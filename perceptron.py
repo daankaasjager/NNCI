@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.special import comb
 
 # Global variables
@@ -65,6 +66,25 @@ def train(data):
         sweep_count += 1
     return False    
 
+def plot_graph(alpha_values, Qls_values, Pls_values):
+    plt.figure(figsize=(10, 6))
+
+    # Plot experimental success rate
+    plt.plot(alpha_values, Qls_values, 'o-', label='Experimental Ql.s.')
+
+    # Plot theoretical probability
+    plt.plot(alpha_values, Pls_values, 's-', label='Theoretical Pl.s.')
+
+    # Annotating the graph
+    plt.title('Comparison of Experimental Success Rate and Theoretical Probability')
+    plt.xlabel('Alpha (P/N)')
+    plt.ylabel('Success Rate / Theoretical Probability')
+    plt.legend()
+    plt.grid(True)
+
+    # Show the plot
+    plt.show() 
+
 
 if __name__ == "__main__":
     print("hello world")
@@ -89,3 +109,5 @@ if __name__ == "__main__":
         print(f"alpha: {ALPHA}, num_successful: {num_successful}, success_rate: {success_rate}, Pl.s.: {theoretical_probability}")
         
         ALPHA += 0.25
+    
+    plot_graph(alpha_values, Qls_values, Pls_values)

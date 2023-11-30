@@ -1,10 +1,21 @@
 import numpy as np
 
 # Global variables
-P = 10
+
+# Number of dimensions of the input vectors
 N = 20
+
+# Scaler for the number of input vectors
 ALPHA = 0.75
-MAX_SWEEPS = 3
+
+# Number of input vectors
+P = int(ALPHA * N)
+
+# Iterations of the algorithms
+ND = 50
+
+# Nmax in the assignment(
+MAX_SWEEPS = 100
 
 
 def generate_dataset():
@@ -16,10 +27,6 @@ def generate_dataset():
 
 def initialize_weights():
     return np.zeros((P, N))
-
-
-def calculate_Ev():
-    pass
 
 
 def update_weight(weight_vector, input_vector, vector_label):
@@ -35,7 +42,7 @@ def train(data):
             if np.dot(w[i], data[i][0]) * data[i][1] <= 0:
                 update_weight(w[i], data[i][0], data[i][1])
                 no_updates = False
-
+        # Unchanged for a whole sweep of the weight vectors
         if no_updates:
             print("Finished training")
             break
@@ -46,4 +53,5 @@ def train(data):
 if __name__ == "__main__":
     print("hello world")
     xi_vector_set = generate_dataset()
+
     train(xi_vector_set)

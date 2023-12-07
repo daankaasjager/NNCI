@@ -5,10 +5,14 @@ from scipy.special import comb
 # Global variables
 
 # Number of dimensions of the input vectors
-N = 40
+N = 20
 
 # Scaler for the number of input vectors
 ALPHA = 0.75
+ALPHA_INCREMENT = 0.25
+ALPHA_MAX_RANGE = 3
+# Threshold value
+C = 0.1
 
 # Number of input vectors
 P = int(ALPHA * N)
@@ -41,7 +45,7 @@ def Pls(P, N):
 
 
 def update_weight(weight_vector, input_vector, vector_label, E):
-    if E <= 0:
+    if E <= C:
         weight_vector += (1/N)*input_vector*vector_label
     return weight_vector
 
@@ -66,6 +70,7 @@ def train(data):
         sweep_count += 1
     return False    
 
+
 def plot_graph(alpha_values, Qls_values, Pls_values):
     plt.figure(figsize=(10, 6))
 
@@ -76,7 +81,8 @@ def plot_graph(alpha_values, Qls_values, Pls_values):
     plt.plot(alpha_values, Pls_values, 's-', label='Theoretical Pl.s.')
 
     # Annotating the graph
-    plt.title('Comparison of Experimental Success Rate and Theoretical Probability')
+    plt.title(f'Comparison of Experimental Success Rate and Theoretical Probability (N = {N}, nd = {ND},'
+              f' nmax = {MAX_SWEEPS}, c = {C})')
     plt.xlabel('Alpha (P/N)')
     plt.ylabel('Success Rate / Theoretical Probability')
     plt.legend()
@@ -91,7 +97,7 @@ if __name__ == "__main__":
     alpha_values = []
     Qls_values = []
     Pls_values = []
-    while ALPHA != 3:
+    while ALPHA <= ALPHA_MAX_RANGE:
         P = int(ALPHA * N)
         num_successful = 0
         for i in range(ND):
@@ -108,6 +114,6 @@ if __name__ == "__main__":
         
         print(f"alpha: {ALPHA}, num_successful: {num_successful}, success_rate: {success_rate}, Pl.s.: {theoretical_probability}")
         
-        ALPHA += 0.25
+        ALPHA += ALPHA_INCREMENT
     
     plot_graph(alpha_values, Qls_values, Pls_values)

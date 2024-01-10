@@ -106,9 +106,10 @@ if __name__ == "__main__":
     print("hello world")
     alpha_values = []
     generalization_errors = []
+    avg_generalization_errors = []
     while ALPHA != 5:
         P = int(ALPHA * N)
-        for i in range(ND):
+        for _ in range(ND):
             w_star = generate_teacher_perceptron()
             xi_vector_set = generate_dataset(w_star)
             final_w = train(xi_vector_set)
@@ -117,11 +118,11 @@ if __name__ == "__main__":
 
         alpha_values.append(ALPHA)
         avg_error = np.mean(generalization_errors)
-        generalization_errors.append(avg_error)    
+        avg_generalization_errors.append(avg_error)    
             
 
         ALPHA += 0.25
-    plt.plot(alpha_values, generalization_errors, marker='o')
+    plt.plot(alpha_values, avg_generalization_errors, marker='o')
     plt.xlabel('Alpha (P/N)')
     plt.ylabel('Average Generalization Error')
     plt.title('Learning Curve')

@@ -8,7 +8,7 @@ from scipy.special import comb
 N = 40
 
 # Scaler for the number of input vectors
-ALPHA = 0.75
+ALPHA = 0.25
 
 # Number of input vectors
 P = int(ALPHA * N)
@@ -18,6 +18,7 @@ ND = 50
 
 # Nmax in the assignment(
 MAX_SWEEPS = 100
+
 
 
 def generate_dataset():
@@ -91,7 +92,7 @@ if __name__ == "__main__":
     alpha_values = []
     Qls_values = []
     Pls_values = []
-    while ALPHA != 3:
+    while ALPHA != 5:
         P = int(ALPHA * N)
         num_successful = 0
         for i in range(ND):

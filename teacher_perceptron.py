@@ -14,10 +14,15 @@ ALPHA = 0.25
 P = int(ALPHA * N)
 
 # Iterations of the algorithms
-ND = 50
+ND = 10
 
 # Nmax in the assignment(
 MAX_SWEEPS = 100
+
+# Stopping criterion for the angular change
+STOPPING_ANGLE = 0.02
+# Determines whether to run the angular stopping or a normal run
+ANGULAR_STOP = True
 
 
 def generate_teacher_perceptron():
@@ -47,21 +52,23 @@ def initialize_weights():
 
 def update_weight(weight_vector, xi_vector, vector_label):
     # Formula from the assignment brief
-    return weight_vector + (1/N)*xi_vector*vector_label
+    return weight_vector + (1 / N) * xi_vector * vector_label
 
 
 def calculate_generalization_error(w, w_star):
     # Formula from the assignment brief
-    return 1/np.pi * np.arccos(np.dot(w, w_star)/(np.linalg.norm(w) * np.linalg.norm(w_star)))
+    return 1 / np.pi * np.arccos(np.dot(w, w_star) / (np.linalg.norm(w) * np.linalg.norm(w_star)))
 
 
 def train(data):
     sweep_count = 0
     w = initialize_weights()
-    while sweep_count != MAX_SWEEPS*P:
+    angular_change = None
+
+    while sweep_count != MAX_SWEEPS * P:
         # Calculating the stabilities
         stabilities = [label * np.dot(w, xi_vector) for xi_vector, label in data]
-        
+
         # Avoiding division by zero
         if sweep_count != 0:
             stabilities /= np.linalg.norm(w)
@@ -70,11 +77,23 @@ def train(data):
         min_stability_index = np.argmin(stabilities)
         xi_min, label_min = data[min_stability_index]
 
+        old_weight_copy = w
+
         # Updating the weight vector
         w = update_weight(w, xi_min, label_min)
 
+        if ANGULAR_STOP:
+            # Angular change stopping criterion
+            if not np.all(w == 0) and not np.all(old_weight_copy == 0):
+                angular_change = np.arccos(
+                    np.dot(w, old_weight_copy) / (np.linalg.norm(w) * np.linalg.norm(old_weight_copy))) / np.pi
+
+            if (angular_change is not None) and (angular_change < STOPPING_ANGLE):
+                print(
+                    f"Angular change {angular_change} smaller than threshold: {STOPPING_ANGLE} after {sweep_count} sweeps. Training terminated")
+                break
         sweep_count += 1
-    return w        
+    return w, sweep_count
 
 
 if __name__ == "__main__":
@@ -82,31 +101,49 @@ if __name__ == "__main__":
     alpha_values = []
     generalization_errors = []
     avg_generalization_errors = []
-    while ALPHA != 5:
+    run_count = 0
+    avg_angular_sweep_count = []
+    while ALPHA <= 5.0:
+        all_angular_sweep_count = []
         P = int(ALPHA * N)
         for _ in range(ND):
             # Generating the teacher perceptron
             w_star = generate_teacher_perceptron()
-            
+
             # Generating the dataset and training with minover, returning the final weight vector
             xi_vector_set = generate_dataset(w_star)
-            final_w = train(xi_vector_set)
-            
+            final_w, sweep_count = train(xi_vector_set)
+
             # Getting the generalization error
             generalization_error = calculate_generalization_error(final_w, w_star)
             generalization_errors.append(generalization_error)
 
+            # Get the sweep_count for each run
+            all_angular_sweep_count.append(sweep_count)
+
         # Calculating the average generalization error for graphing
         alpha_values.append(ALPHA)
         avg_error = np.mean(generalization_errors)
-        avg_generalization_errors.append(avg_error)    
+        avg_generalization_errors.append(avg_error)
+        avg_angular_sweep_count.append(np.mean(all_angular_sweep_count))
+        if run_count == 0:
+            ALPHA += 0.25
+        else:
+            ALPHA += 0.5
+        run_count += 1
 
-        ALPHA += 0.25
-    
-    # Plotting the final graph    
+    directory = 'D:/Master/blok_1b/NNCI/assignment2/images/'
+    learning = f'learning_{STOPPING_ANGLE:.2f}.png'
+    sweeps = f'sweeps_{STOPPING_ANGLE:.2}.png'
+    # Plotting the final graph
     plt.plot(alpha_values, avg_generalization_errors, marker='o')
-    plt.xlabel('Alpha (P/N)')
-    plt.ylabel('Average Generalization Error')
-    plt.title('Learning Curve')
-    plt.show()        
-    
+    plt.xlabel('\u03B1 (P/N)')
+    plt.ylabel('Average Generalization Error \u03B5g(tmax)')
+    plt.savefig(directory + learning)
+    plt.show()
+
+    plt.plot(alpha_values, avg_angular_sweep_count, marker='o')
+    plt.xlabel('\u03B1 (P/N)')
+    plt.ylabel(f'Average number of sweeps for \u03b8 = {STOPPING_ANGLE:.2e}')
+    plt.savefig(directory + sweeps)
+    plt.show()
